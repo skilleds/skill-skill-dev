@@ -3,7 +3,7 @@
 Todas as mudanças relevantes deste pacote, no formato [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/),
 com versionamento [SemVer](https://semver.org/lang/pt-BR/).
 
-## [Não lançado]
+## [0.4.0] — 2026-11-03
 ### Adicionado
 - Processo de release REAL documentado (`references/release.md`): `tools/release.mjs --batch`, `## [Não lançado]` nos agents, orquestrador fecha a versão, `sync-herdados`, grafos, derivados, piso 22 pós-release, ritmo e custo.
 - `check-skill.sh`: regras `ci-gatilho` (template de CI sem `pull_request`/push em branch; exige `workflow_dispatch` e `concurrency` com `cancel-in-progress`, piso 27) e `i18n-ausente` (`[descriptions]` pt/en/es), com testes vermelho e verde.
