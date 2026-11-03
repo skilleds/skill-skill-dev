@@ -3,7 +3,7 @@ name = "schematize-skill-dev"
 tag = "Disciplina · Autoria de skills"
 status = "beta"
 order = 42
-current_version = "0.3.2"
+current_version = "0.4.0"
 href = "/skill-dev"
 
 [descriptions]

@@ -1,0 +1,12 @@
+slug = "skill-dev"
+name = "schematize-skill-dev"
+tag = "Disciplina · Autoria de skills"
+status = "beta"
+order = 42
+current_version = "0.4.0"
+href = "/skill-dev"
+
+[descriptions]
+pt = "Como criar e manter uma skill no padrão da casa: anatomia, description curta com gatilho, blocos herdados e sync, lint, teste com vermelho plantado, release (bump em 4 lugares, snapshot, zip, tag), grafo e skills.json. Traz gate, bump e empacotador."
+en = "How to create and maintain a skill in the house standard: anatomy, short description with a trigger, inherited blocks and sync, lint, tests with planted red cases, release (4-place bump, snapshot, zip, tag), graph and skills.json. Ships a gate, a bump script and a packager."
+es = "Cómo crear y mantener una skill en el estándar de la casa: anatomía, description corta con disparador, bloques heredados y sync, lint, pruebas con rojo plantado, release (bump en 4 lugares, snapshot, zip, tag), grafo y skills.json. Incluye gate, bump y empaquetador."

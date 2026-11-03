@@ -1,7 +1,7 @@
 ---
 name: schematize-skill-dev
 metadata:
-  version: 0.3.2
+  version: 0.4.0
 description: >-
   Cria e mantém skills do catálogo: anatomia, description, herdados, lint, teste com vermelho, release e grafo. Use ao tocar skill-*/, SKILL.md ou skill.toml. Docs: schematize-docs.
 ---
@@ -15,7 +15,7 @@ publicada sem gate reintroduz a cada versão os mesmos defeitos (versão em 3 de
 estourada, script sem teste, comando que colide com o de outra skill), e o catálogo só acusa tarde,
 no lint global. Esta skill põe o gate na mão de quem está escrevendo.
 
-**Versão:** skill `schematize-skill-dev` v0.3.2. Changelog em `CHANGELOG.md`.
+**Versão:** skill `schematize-skill-dev` v0.4.0. Changelog em `CHANGELOG.md`.
 
 ## Precedência e herança (leia antes de divergir)
 
