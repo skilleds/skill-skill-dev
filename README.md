@@ -31,7 +31,7 @@ bash /tmp/skill-skill-dev/install.sh .        # instala em .claude/ do projeto a
 
 ## O que tem dentro
 
-- **SKILL.md** — o contrato: 15 pisos inegociáveis, a fronteira com `docs` e `engineering` e o mapa de references.
+- **SKILL.md** — o contrato: 14 pisos inegociáveis, a fronteira com `docs` e `engineering` e o mapa de references.
 - **references/** — `anatomia`, `description-e-comandos`, `herdados`, `lint-e-testes`, `release`,
   `integracao-catalogo` e `stack-versoes` (anexo volátil com data, fonte e o que foi executado).
 - **scripts/** — `check-skill.sh` (o gate de uma skill, sem node nem catálogo), `bump-skill.sh`
