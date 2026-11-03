@@ -30,7 +30,7 @@ skill_boa() {
   printf '0.1.0\n' >"$D/VERSION"
   printf 'MIT\n' >"$D/LICENSE"
   printf '#!/usr/bin/env bash\n' >"$D/install.sh"
-  printf 'slug = "demo"\ncurrent_version = "0.1.0"\n' >"$D/skill.toml"
+  printf 'slug = "demo"\ncurrent_version = "0.1.0"\n\n[descriptions]\npt = "demo"\nen = "demo"\nes = "demo"\n' >"$D/skill.toml"
   printf '# Demo\n\nO pacote tem 2 pisos inegociáveis.\n' >"$D/README.md"
   printf '# Changelog\n\n## [0.1.0] — 2026-10-14\nPrimeira versão.\n' >"$D/CHANGELOG.md"
   printf '# Piso\n\n1. regra\n<!-- herdado:engineering/orquestracao:curto -->x<!-- /herdado -->\n' >"$D/assets/CLAUDE.md"
@@ -80,10 +80,16 @@ skill_boa description-longa
   { printf '  '; head -c 400 /dev/zero | tr '\0' 'a'; printf ' Use ao tocar x.\n'; } >"$TMP/longa.txt"
   sed -i "/^  Skill de teste/{r $TMP/longa.txt
 d}" "$D/SKILL.md";                                                                esperar 1 "description-teto"
-skill_boa description-acima-do-alvo
-  { printf '  '; head -c 260 /dev/zero | tr '\0' 'a'; printf ' Use ao tocar x.\n'; } >"$TMP/media.txt"
-  sed -i "/^  Skill de teste/{r $TMP/media.txt
-d}" "$D/SKILL.md";                                                                esperar 0 "AVISO description-teto"
+skill_boa description-191;
+  { printf '  '; head -c 120 /dev/zero | tr '\0' 'a'; printf ' Use ao tocar x. Divisa: schematize-docs'; } >"$TMP/d191.txt"
+  tam=$(( $(wc -c <"$TMP/d191.txt") - 2 )); extra=$(( 191 - tam )); [ "$extra" -gt 0 ] && head -c "$extra" /dev/zero | tr '\0' 'b' >>"$TMP/d191.txt"; echo >>"$TMP/d191.txt"
+  sed -i "/^  Skill de teste/{r $TMP/d191.txt
+d}" "$D/SKILL.md";                                                                esperar 1 "description-teto"
+skill_boa description-190-passa;
+  { printf '  '; head -c 120 /dev/zero | tr '\0' 'a'; printf ' Use ao tocar x. Divisa: schematize-docs'; } >"$TMP/d190.txt"
+  tam=$(( $(wc -c <"$TMP/d190.txt") - 2 )); extra=$(( 190 - tam )); [ "$extra" -gt 0 ] && head -c "$extra" /dev/zero | tr '\0' 'b' >>"$TMP/d190.txt"; echo >>"$TMP/d190.txt"
+  sed -i "/^  Skill de teste/{r $TMP/d190.txt
+d}" "$D/SKILL.md";                                                                esperar 0 "check-skill: ok"
 skill_boa description-sem-gatilho;          sed -i 's/Use ao tocar demo.txt\. //' "$D/SKILL.md"; esperar 0 "AVISO description-gatilho"
 
 echo "== vermelho: versão"
@@ -129,7 +135,17 @@ skill_boa caminho-privado;                  printf 'veja %s\n' "/ho""me/fulano/p
 skill_boa ci-sem-sha
   mkdir -p "$D/assets/ci"; printf 'jobs:\n  a:\n    steps:\n      - uses: actions/checkout@v4\n' >"$D/assets/ci/w.yml"; esperar 1 "ci-pin"
 skill_boa ci-com-sha
-  mkdir -p "$D/assets/ci"; printf 'jobs:\n  a:\n    steps:\n      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4\n' >"$D/assets/ci/w.yml"; esperar 0 "check-skill: ok"
+  mkdir -p "$D/assets/ci"; printf 'on:\n  workflow_dispatch:\nconcurrency:\n  cancel-in-progress: true\njobs:\n  a:\n    steps:\n      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4\n' >"$D/assets/ci/w.yml"; esperar 0 "check-skill: ok"
+skill_boa ci-pull-request
+  mkdir -p "$D/assets/ci"; printf 'on:\n  pull_request:\n  workflow_dispatch:\nconcurrency:\n  cancel-in-progress: true\njobs: {}\n' >"$D/assets/ci/w.yml"; esperar 1 "ci-gatilho"
+skill_boa ci-push-branch
+  mkdir -p "$D/assets/ci"; printf 'on:\n  workflow_dispatch:\n  push:\n    branches: [main]\nconcurrency:\n  cancel-in-progress: true\njobs: {}\n' >"$D/assets/ci/w.yml"; esperar 1 "ci-gatilho"
+skill_boa ci-sem-concurrency
+  mkdir -p "$D/assets/ci"; printf 'on:\n  workflow_dispatch:\njobs: {}\n' >"$D/assets/ci/w.yml"; esperar 1 "ci-gatilho"
+skill_boa ci-dispatch-tags-ok
+  mkdir -p "$D/assets/ci"; printf 'on:\n  workflow_dispatch:\n  push:\n    tags: ["hml-*", "v*"]\nconcurrency:\n  cancel-in-progress: true\njobs: {}\n' >"$D/assets/ci/w.yml"; esperar 0 "check-skill: ok"
+skill_boa i18n-sem-es;                      sed -i '/^es = /d' "$D/skill.toml"; esperar 1 "i18n-ausente"
+skill_boa i18n-en-vazio;                    sed -i 's/^en = .*/en = ""/' "$D/skill.toml"; esperar 1 "i18n-ausente"
 skill_boa readme-conta-errado;              sed -i 's/2 pisos/9 pisos/' "$D/README.md"; esperar 1 "readme-contagem"
 
 echo "== waiver rastreável e entradas inválidas"

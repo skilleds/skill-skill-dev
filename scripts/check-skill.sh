@@ -9,8 +9,8 @@
 # raiz da skill, uma linha por dispensa: `<regra> <motivo>` (sem motivo não vale).
 # Dispensa de teste por script: `lib.sh`/`*.lib.sh` (biblioteca sourceada) ou `# teste-ok: <motivo>` nas 30 primeiras linhas.
 # Prefixo de comando = o do `<prefixo>-help.md` (pode ter hífen); <3 comandos de trabalho é AVISO.
-# Entrada: $1 = diretório da skill (obrigatório). Env SKILL_DESC_MAX (default 350, teto do lint),
-#   SKILL_DESC_ALVO (default 235, alvo para skill nova), SKILL_CATALOGO (raiz com os skill-*/
+# Entrada: $1 = diretório da skill (obrigatório). Env SKILL_DESC_MAX (default 190, teto da casa),
+#   SKILL_DESC_ALVO (default = o teto, sem alvo menor), SKILL_CATALOGO (raiz com os skill-*/
 #   irmãos, para checar colisão de prefixo; default: o pai do diretório).
 # Saída: exit 0 passa (avisos não reprovam) · 1 reprova · 2 nada para verificar (não é aprovação).
 #
@@ -18,7 +18,7 @@
 #   versao-ausente · versao-dessincronizada · versao-linha-multipla · changelog-defasado ·
 #   snapshot-ausente · comando-prefixo · comando-obrigatorio · comando-frontmatter ·
 #   comando-colisao · script-sem-teste · teste-sem-vermelho · teste-sem-verde · herdado-ausente ·
-#   herdado-desbalanceado · anexo-volatil · emoji · zip-no-pacote · ci-pin · readme-contagem ·
+#   herdado-desbalanceado · ci-gatilho (piso 27) · i18n-ausente · anexo-volatil · emoji · zip-no-pacote · ci-pin · readme-contagem ·
 #   caminho-privado.
 #
 # EXCEÇÃO DECLARADA de strict mode (`schematize-shell` -> `references/piso.md`): este script é um
@@ -31,8 +31,9 @@ DIR="${1:-}"
 DIR="$(cd "$DIR" && pwd)"
 [ -f "$DIR/SKILL.md" ] || [ -f "$DIR/skill.toml" ] || { echo "check-skill: '$DIR' não parece uma skill (sem SKILL.md nem skill.toml) — nada para verificar" >&2; exit 2; }
 
-DESC_MAX="${SKILL_DESC_MAX:-350}"
-DESC_ALVO="${SKILL_DESC_ALVO:-235}"
+# Teto da casa: 190 chars (soma do catálogo <= 9000). Era 350/235 e deixava passar description que estoura o orçamento.
+DESC_MAX="${SKILL_DESC_MAX:-190}"
+DESC_ALVO="${SKILL_DESC_ALVO:-$DESC_MAX}"
 BASE="$(basename "$DIR")"
 SLUG="${BASE#skill-}"
 CATALOGO="${SKILL_CATALOGO:-$(dirname "$DIR")}"
@@ -78,7 +79,7 @@ if [ -f "$DIR/SKILL.md" ]; then
     else
       n=${#DESC}
       if [ "$n" -gt "$DESC_MAX" ]; then
-        emit ERRO description-teto SKILL.md 1 "description com $n chars (limite $DESC_MAX do lint) — excede em $((n-DESC_MAX))"
+        emit ERRO description-teto SKILL.md 1 "description com $n chars (limite $DESC_MAX da casa: a soma do catálogo tem teto de 9000) — excede em $((n-DESC_MAX))"
       elif [ "$n" -gt "$DESC_ALVO" ]; then
         emit AVISO description-teto SKILL.md 1 "description com $n chars (alvo $DESC_ALVO: a soma do catálogo tem teto)"
       fi
@@ -239,6 +240,28 @@ if [ -d "$DIR/assets/ci" ]; then
       case "$u" in ./*) continue ;; esac
       grep -qE '@[0-9a-f]{40}$' <<<"$u" || emit ERRO ci-pin "$(rel "$y")" "$n" "uses: $u não está pinado por SHA de 40 hex"
     done < <(grep -nE '^[[:space:]-]*uses:' "$y")
+  done
+fi
+
+# ---------------------------------------------------------------- gatilho de CI (piso 27) e i18n
+# Template de CI nasce com workflow_dispatch + push em TAGS e concurrency cancel-in-progress. VETADO
+# pull_request/pull_request_target/workflow_run/merge_group/schedule e push/branches (CI remoto por commit).
+if [ -d "$DIR/assets/ci" ]; then
+  for y in "$DIR"/assets/ci/*.yml "$DIR"/assets/ci/*.yaml; do
+    [ -e "$y" ] || continue
+    sem="$(grep -vE '^[[:space:]]*#' "$y")"
+    n="$(grep -nE '^[[:space:]]*(pull_request|pull_request_target|workflow_run|merge_group|schedule)[[:space:]]*:|^on:[[:space:]]*(\[.*(pull_request|push|schedule|workflow_run|merge_group)|(pull_request|push|schedule))|^[[:space:]]+(branches|branches-ignore|tags-ignore):' "$y" | grep -vE '^[0-9]+:[[:space:]]*#' | head -n1 | cut -d: -f1)"
+    if [ -n "$n" ]; then
+      emit ERRO ci-gatilho "$(rel "$y")" "$n" "gatilho vetado pelo piso 27 (pull_request/push em branch/workflow_run/schedule): use workflow_dispatch + push tags [hml-*, v*]"
+    elif ! grep -qE '^[[:space:]]*workflow_dispatch[[:space:]]*:' <<<"$sem" || ! grep -qE 'cancel-in-progress:[[:space:]]*true' <<<"$sem"; then
+      emit ERRO ci-gatilho "$(rel "$y")" 1 "template de CI sem workflow_dispatch ou sem concurrency cancel-in-progress: true (piso 27)"
+    fi
+  done
+fi
+if [ -f "$DIR/skill.toml" ]; then
+  for lg in pt en es; do
+    awk -v k="$lg" '/^\[descriptions\]/{d=1; next} /^\[/{d=0} d && $0 ~ "^"k"[[:space:]]*=" {v=$0; sub(/^[^=]*=[[:space:]]*/,"",v); gsub(/["[:space:]]/,"",v); if (length(v)>0) ok=1} END{exit ok?0:1}' "$DIR/skill.toml" \
+      || emit ERRO i18n-ausente skill.toml 1 "[descriptions] sem '$lg' (pt, en e es são obrigatórios)"
   done
 fi
 

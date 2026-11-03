@@ -9,7 +9,7 @@
 |---|---|---|
 | `scripts/check-skill.sh <dir>` | esta skill, qualquer máquina | uma skill; só bash/awk; sem node, sem o catálogo |
 | `node tools/lint.mjs [--skill <slug>]` | catálogo (privado) | cruza skills: ponteiros, comandos, soma de descriptions, `skills.json` |
-| `bash tools/ci.sh` | catálogo | self-test do lint, índice, herdados, `skills.json`, lint, gates de linguagem, shell e Python |
+| `bash tools/ci.sh` | catálogo | a fonte da verdade é o próprio script (lint, índice, herdados, `skills.json` e os gates dos pisos 22-29: `check-ci-triggers`, `check-resilience`, `check-deploy-git`, higiene/build-host) |
 
 O gate local é a primeira linha (barata, na hora de escrever); o lint e o `ci.sh` são a segunda e
 rodam antes de todo release.
@@ -24,9 +24,11 @@ rodam antes de todo release.
 | `ref-comando` | `/<prefixo>-<nome>` que não existe em nenhum `assets/commands/` |
 | `ref-skill` | `schematize-<x>` citada que não existe no catálogo |
 | `yaml-valido` | frontmatter inválido ou `name` diferente de `schematize-<dir>` |
-| `description` | mais de 350 caracteres (erro); soma acima do orçamento (aviso) |
+| `description` | acima do teto do lint (erro); soma acima do orçamento de 9000 (aviso). O gate local é mais estrito: 190 |
 | `versao` | 4 lugares diferentes, CHANGELOG atrás de `VERSION`, falta `versions/v<VERSION>/`, ausência no `skills.json` |
 | `deriva-scripts` | cópias de script compartilhado divergentes entre skills |
+| `ci-gatilho` (só no `check-skill.sh`) | `assets/ci/*.yml` com `pull_request`/push em branch/`workflow_run`/`schedule`, ou sem `workflow_dispatch` e `concurrency` com `cancel-in-progress` (piso 27) |
+| `i18n-ausente` (só no `check-skill.sh`) | `[descriptions]` do `skill.toml` sem `pt`, `en` ou `es` não vazio |
 | `ci-pin` | `uses:` em `assets/ci/*.yml` sem SHA de 40 hex (ou `docker://` sem digest) |
 | `maturidade` | `stable` em 0.x e afins |
 | `contagem` | README diz N pisos, SKILL.md tem outro N (`--fix` corrige o número) |

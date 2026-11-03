@@ -13,8 +13,7 @@
 
 | Item | Valor | Fonte |
 |---|---|---|
-| Teto da `description` por skill | 350 caracteres (erro) | `tools/lint.mjs` (constante de limite) |
-| Alvo da `description` de skill nova | 235 caracteres | instrução do lote de skills novas de 2026-10-14; `check-skill.sh` avisa |
+| Teto da `description` por skill | 190 caracteres (erro no `check-skill.sh`) | orçamento do catálogo (soma <= 9000); `tools/lint.mjs` ainda tem 350 como piso mais frouxo |
 | Soma das `description` do catálogo | 9000 caracteres (aviso) | `tools/lint.mjs` |
 | Itens copiados no snapshot | `SKILL.md`, `VERSION`, `skill.toml`, `references`, `assets`, `scripts`, `gui.json` | `tools/release.mjs` |
 | Itens do zip | os do snapshot + `CHANGELOG.md` e `LICENSE`, top-level `schematize-<slug>/` | `tools/release.mjs` |

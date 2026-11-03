@@ -33,7 +33,7 @@ Ordem interna (para no primeiro erro):
 1. **Pré-condições:** versão SemVer e MAIOR que a atual; 1ª entrada do CHANGELOG igual à versão;
    árvore da skill **limpa**; branch `main`; `main` sincronizada com `origin` (nem commit local sem
    push, nem remoto à frente).
-2. **Gate:** `tools/ci.sh` (self-test do lint, índice, herdados, `skills.json`, lint). `--skip-gate`
+2. **Gate:** `tools/ci.sh` — a fonte da verdade do que ele roda é o próprio script (hoje: self-tests do lint e do índice, gatilhos de CI do piso 27, resiliência do 28, higiene/build-host do 29, deploy/diff dos 22-24, herdados em sincronia, `skills.json`, lint); não enumere aqui. `--skip-gate`
    é dívida declarada, não atalho.
 3. **Bump** nos 4 lugares.
 4. **Snapshot** `versions/v<ver>/` (`SKILL.md`, `VERSION`, `skill.toml`, `references`, `assets`,
@@ -61,7 +61,7 @@ reporta publicadas e faltantes, sem desfazer.
 ### Primeira versão dentro do catálogo (nativo, sem hack)
 
 Skill sem nenhuma tag `v*` (local ou no origin) é detectada como 1ª versão: o release aceita a
-versão **igual** à `VERSION` atual (ex.: `0.1.0`), cria `schematizeme/skill-<slug>` público se
+versão **igual** à `VERSION` atual (ex.: `0.1.0`), cria `skilleds/skill-<slug>` público se
 `gh repo view` falhar e empurra com `-u origin main --follow-tags`. Basta o repo git próprio com
 commit inicial, árvore limpa e a entrada do CHANGELOG no topo:
 
@@ -71,6 +71,41 @@ node tools/release.mjs <slug> 0.1.0 --first --notes "..."   # --first: reprova s
 
 Não crie `VERSION` 0.0.0 nem `versions/v0.0.0/.gitkeep` para contornar: era o hack antigo.
 Critério e teste: seção "Primeira versão" do RELEASE.md do catálogo.
+
+### O processo REAL: release em lote, feito pelo orquestrador
+
+Na prática o catálogo não publica skill por skill no meio do trabalho: edita-se muitas skills (em
+paralelo, por grupos de agents) e **uma única passada** publica o lote. A divisão de trabalho:
+
+1. **Os agents de grupo** só editam a skill e commitam/pushan (commit pequeno por tema, `main`, na
+   hora; piso 22). Eles **NÃO** fazem bump, snapshot, tag, zip nem `gh release`, e **não tocam em
+   `versions/`**. O que mudou entra numa seção **`## [Não lançado]`** no topo do `CHANGELOG.md` da
+   skill (Adicionado / Alterado / Corrigido, com o porquê). `[Não lançado]` não é versão: o gate
+   (`changelog-defasado`) e o release ignoram esse cabeçalho.
+2. **Herdados:** mudou o piso na base? O orquestrador roda `node tools/sync-herdados.mjs --write`
+   (ou `--root <cópia>` se há trabalho alheio em andamento) e `--check`; blocos e arquivos herdados
+   nunca se editam à mão (`references/herdados.md`).
+3. **Grafos:** `node tools/build-graph.mjs` (o release já regenera e commita só `.schematize/grafos/`
+   antes do gate; `--check` confirma). `skills.json` do front vem do `tools/sync-skills-json.mjs`.
+4. **O ORQUESTRADOR faz o lote** (não os agents): para cada skill do lote, renomeia `## [Não
+   lançado]` para `## [X.Y.Z] — AAAA-MM-DD` (versão SemVer calculada pelo que mudou: piso novo =
+   minor), commita e pusha; confere árvore limpa e `main` sincronizada; então
+   `node tools/release.mjs --batch <slug>@<ver> ... --dry-run` e, verde, sem `--dry-run`. O gate
+   (`tools/ci.sh`) roda UMA vez, a pré-validação é all-or-nothing, cada skill é publicada em série e
+   os derivados (`skills.json` no front, grafos no catálogo) saem commitados e publicados.
+5. **Fecha provado (piso 22):** em cada skill publicada, no front e no catálogo,
+   `git remote -v` não vazio, `git status` limpo e `HEAD == origin`
+   (`schematize-git -> scripts/check-git.sh . --conclusao`). Lote que deixa repo sem push **não conclui**.
+6. **Ritmo (piso 26):** lote de dezenas leva minutos (~12 min para 21 releases); durante o trabalho
+   o orquestrador grava o relatório de 30 min em `<projeto>_archive/relatorios/` (com o custo do
+   período lido de `custos/`) e o handoff de 6 h; agents de grupo terminados são encerrados (piso 25).
+7. **CI remoto (piso 27):** nada aqui dispara CI por commit; o gate é local (`tools/ci.sh`). Se a
+   skill traz `assets/ci/*.yml`, o gatilho é `workflow_dispatch` + `push: tags ["hml-*", "v*"]` com
+   `concurrency` (regra `ci-gatilho` do `check-skill.sh`).
+
+**Organização do remoto:** a constante `ORG` de `tools/release.mjs` e `tools/release-first.mjs` é
+`skilleds`, e é a org dos `origin` (`github.com/skilleds/skill-<slug>`); os exemplos desta skill usam
+a mesma. Mudar de org é mudar a constante e o `origin` de todas as skills, não um parágrafo.
 
 ## 3. Fallback, só FORA do catálogo: primeira versão ou repo isolado
 
@@ -86,13 +121,15 @@ git init -b main                                        # só na 1ª vez
 git add -- <lista explícita de arquivos>                # nunca -A
 git commit -m "release: v<ver>"
 git tag -a v<ver> -m "v<ver>"
-gh repo create schematizeme/skill-<slug> --public --source . --remote origin --push   # 1ª vez
+gh repo create skilleds/skill-<slug> --public --source . --remote origin --push   # 1ª vez
 git push --follow-tags                                  # demais vezes
 gh release create v<ver> /caminho/fora/skill-<slug>.zip --title "v<ver>" --notes "<texto>"
 ```
 
 Na 1ª versão a skill já nasce em `0.1.0` com `versions/v0.1.0/` criado pelo `bump-skill.sh` (ou
-copiado à mão com os mesmos itens). Instale e prove: `bash skill-<slug>/install.sh "$HOME"`.
+copiado à mão com os mesmos itens). Instale e prove: `bash skill-<slug>/install.sh "$HOME"`. **Depois** (o fallback não faz sozinho): peça ao dono do
+catálogo `tools/sync-skills-json.mjs`, `tools/build-graph.mjs` e o `tools/lint.mjs`, e confira o piso 22
+(`git remote -v`, `status` limpo, `HEAD == origin`).
 
 ## 4. Depois do release
 

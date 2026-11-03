@@ -102,8 +102,8 @@ Scripts: `scripts/check-skill.sh` (gate) · `scripts/bump-skill.sh` (4 lugares +
 2. **Anatomia completa:** `SKILL.md`, `skill.toml`, `VERSION`, `CHANGELOG.md`, `README.md`, `LICENSE`,
    `install.sh`, `assets/CLAUDE.md`, `assets/commands/`, `references/`, `scripts/` e `versions/v<ver>/`.
    Nada de `*.zip` dentro do pacote.
-3. **Description em bloco `>-`**, no máximo 350 caracteres (o teto do lint; mire 235 para skill nova,
-   porque a soma do catálogo tem teto), começando pelo **que é**, com **gatilho concreto** ("Use ao
+3. **Description em bloco `>-`**, no máximo **190 caracteres** (a soma do catálogo tem teto de 9000;
+   `check-skill.sh` reprova acima de 190), começando pelo **que é**, com **gatilho concreto** ("Use ao
    tocar ...") e terminando na **divisa** ("X: schematize-Y"). Nunca reivindica território alheio.
 4. **Versão igual nos 4 lugares** (`VERSION`, `current_version` do `skill.toml`, `metadata.version` do
    frontmatter, linha `**Versão:**` única) mais o `skills.json` do front. O `CHANGELOG.md` abre com a
@@ -120,11 +120,14 @@ Scripts: `scripts/check-skill.sh` (gate) · `scripts/bump-skill.sh` (4 lugares +
    de ADR que o leitor não consegue abrir; **sem caminho privado da máquina** (nem home, nem repo
    privado citado como se o leitor o tivesse).
 10. **Português com acentuação correta, sem emoji, setas ASCII** (`->`) nos artefatos lidos por parser.
-11. **Release só com gate verde, árvore limpa e `main` sincronizada:** `git add` com lista explícita
+11. **Release só com gate verde, árvore limpa e `main` sincronizada, em lote pelo orquestrador:** agents de grupo só escrevem `## [Não lançado]` no CHANGELOG e commitam; o orquestrador fecha a versão e roda `tools/release.mjs --batch` (`references/release.md`); `git add` com lista explícita
     (nunca `-A`), tag anotada `v<ver>`, zip com top-level `schematize-<slug>/`, `gh release` com o zip,
     e depois grafo e `skills.json` regenerados.
 12. **GitHub é a fonte da verdade:** commit e push na hora; nada de versão local que o remoto não tem.
 13. <!-- herdado:engineering/orquestracao:curto -->**Orquestrador não desenvolve; subagent barato executa.** O agent principal só planeja, despacha e revisa; ação onerosa vira micro-tasks para o executor mais barato que resolve: `haiku` (mecânico) / `sonnet` (código; falhou → mesmo subagent corrige, até 2 rodadas) → Codex `gpt-5.6-terra` → Cursor → subagent `opus` (motivo) → `park`; **visual vai direto ao Codex**; **imagem nunca pelo Claude: detectar Codex/Gemini e perguntar ao usuário qual usar (Codex é a sugestão), nunca API de imagem paga**; papéis em `agentes.toml`. No overdev, cada item do checklist vai a um subagent e o principal revisa antes do `- [x]`. **Sem frota ociosa:** idle com pendência volta ao trabalho; dependente de outro agent → mata e enfileira com gatilho; terminou → mata (§9.6). Detalhe: `schematize-engineering` → `references/orquestracao.md` §9.<!-- /herdado -->
+
+14. **Template de CI da skill** (`assets/ci/*.yml`) nasce com `workflow_dispatch` + `push: tags ["hml-*", "v*"]` e `concurrency` com `cancel-in-progress` (piso 27); `pull_request`/push em branch é vetado e `check-skill.sh` reprova (`ci-gatilho`). `skill.toml` traz `[descriptions]` pt/en/es não vazias (`i18n-ausente`).
+15. Herda os pisos 22–29 da `schematize-engineering` (git como trava de conclusão, deploy só do git, ops é o gate da IA, sem agents inúteis, relatório 30 min/handoff 6 h, CI remoto só antes do hml, microserviço autônomo, build em dev/hml + higiene). **Checklist de skill nova:** a skill herda os pisos 22–29 desde o `/skill-new` (commit+push+`HEAD==origin`; script sem deploy por scp/rsync; sem agent ocioso; relatório/handoff; CI só dispatch+tags; microserviço autônomo só se a skill o gera; build/higiene).
 
 ## Regra de mídia
 

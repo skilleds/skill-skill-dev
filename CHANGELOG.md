@@ -3,6 +3,16 @@
 Todas as mudanças relevantes deste pacote, no formato [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/),
 com versionamento [SemVer](https://semver.org/lang/pt-BR/).
 
+## [Não lançado]
+### Adicionado
+- Processo de release REAL documentado (`references/release.md`): `tools/release.mjs --batch`, `## [Não lançado]` nos agents, orquestrador fecha a versão, `sync-herdados`, grafos, derivados, piso 22 pós-release, ritmo e custo.
+- `check-skill.sh`: regras `ci-gatilho` (template de CI sem `pull_request`/push em branch; exige `workflow_dispatch` e `concurrency` com `cancel-in-progress`, piso 27) e `i18n-ausente` (`[descriptions]` pt/en/es), com testes vermelho e verde.
+- Checklist de skill nova herda os pisos 22–29; bloco "Herda os pisos 22–29".
+### Corrigido
+- Teto de `description` 350/235 -> 190 (padrão real da casa; soma ≤ 9000) no gate, docs e CLAUDE.md, com teste de 190 (passa) e 191 (reprova).
+- Org do remoto: docs passam a `skilleds` (a de `tools/release.mjs` e dos `origin`) em vez de `schematizeme`.
+- `release.md` e `lint-e-testes.md` não enumeram mais os gates do `ci.sh` (apontam o script como fonte); fallback manual lista o que fazer depois (skills.json, grafos, lint, piso 22).
+
 ## [0.3.2] — 2026-10-16
 ### Alterado
 - `references/release.md`: o release regenera e commita os grafos ANTES do gate (`--dry-run` só avisa)

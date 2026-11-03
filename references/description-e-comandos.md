@@ -24,8 +24,7 @@ description: >-
 
 | Limite | Valor | Quem cobra |
 |---|---|---|
-| Teto por skill | 350 caracteres | lint do catálogo (erro) e `check-skill.sh` (erro) |
-| Alvo para skill nova | 235 caracteres | `check-skill.sh` (aviso) |
+| Teto por skill | 190 caracteres | `check-skill.sh` (erro); a soma do catálogo tem teto de 9000 (`tools/lint.mjs`) |
 | Soma de todas as skills | teto do catálogo | lint (aviso): acima dele o Claude Code lista skills sem descrição |
 
 Os números vivem em `references/stack-versoes.md` (volátil: o catálogo ajusta o orçamento).

@@ -55,7 +55,7 @@ e use o próximo livre; ordem repetida não quebra, mas desordena o card.
 | Quem | Como |
 |---|---|
 | Usuário final | app schematize: `schematize install <slug>` (baixa o zip do GitHub Release) |
-| Manual | `git clone https://github.com/schematizeme/skill-<slug>.git` e `bash install.sh <projeto>` |
+| Manual | `git clone https://github.com/skilleds/skill-<slug>.git` e `bash install.sh <projeto>` |
 | Global na máquina | `bash skill-<slug>/install.sh "$HOME"` (instala em `~/.claude/`) |
 
 `install.sh` é idempotente e poda comando removido. O app mantém as skills atualizadas pela versão do

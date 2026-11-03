@@ -25,13 +25,13 @@ schematize install skill-dev    # requer o CLI schematize instalado
 ### Manual
 
 ```bash
-git clone https://github.com/schematizeme/skill-skill-dev.git /tmp/skill-skill-dev
+git clone https://github.com/skilleds/skill-skill-dev.git /tmp/skill-skill-dev
 bash /tmp/skill-skill-dev/install.sh .        # instala em .claude/ do projeto atual
 ```
 
 ## O que tem dentro
 
-- **SKILL.md** — o contrato: 13 pisos inegociáveis, a fronteira com `docs` e `engineering` e o mapa de references.
+- **SKILL.md** — o contrato: 15 pisos inegociáveis, a fronteira com `docs` e `engineering` e o mapa de references.
 - **references/** — `anatomia`, `description-e-comandos`, `herdados`, `lint-e-testes`, `release`,
   `integracao-catalogo` e `stack-versoes` (anexo volátil com data, fonte e o que foi executado).
 - **scripts/** — `check-skill.sh` (o gate de uma skill, sem node nem catálogo), `bump-skill.sh`

@@ -26,5 +26,6 @@ do catálogo como molde (a mais recente de disciplina).
 6. **Prove:** `bash .claude/skills/schematize-skill-dev/scripts/check-skill.sh skill-<slug>`,
    `node tools/lint.mjs` (zero achados NA skill) e os `*.test.sh`. Diga o que não rodou.
 7. **Snapshot da 1ª versão:** `versions/v0.1.0/` (use `scripts/bump-skill.sh` ou o release). A 1ª publicação é nativa: `node tools/release.mjs <slug> 0.1.0 --first` aceita `VERSION` == versão pedida e cria o repo remoto; nunca use `VERSION` 0.0.0 + `.gitkeep` como atalho.
-8. Publicação é `/skill-release`; integração no catálogo (`graph-meta.json`, `skills.json`) está em
+8. **Pisos 22–29 (herdados):** a skill nasce com repo git próprio, `origin` e `HEAD == origin` (piso 22); script sem `scp`/`rsync` de deploy (23); template de CI só `workflow_dispatch` + tags `hml-*`/`v*` + `concurrency` (27, regra `ci-gatilho`); `[descriptions]` pt/en/es; relatório 30 min/handoff 6 h no archive (26); agents terminados encerrados (25). O bloco "Herda os pisos 22–29" vai no `SKILL.md` e no `assets/CLAUDE.md`.
+9. Publicação é `/skill-release` (em lote, pelo orquestrador); integração no catálogo (`graph-meta.json`, `skills.json`) está em
    `references/integracao-catalogo.md`.
